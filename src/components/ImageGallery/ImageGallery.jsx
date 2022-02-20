@@ -1,48 +1,62 @@
 import { Component } from "react";
 import { ImageGalleryItem } from "./ImageGalleryItem";
 import { ImageGalleryList } from "./ImageGallery.styled";
-
+import { Loader } from "../Loader/Loader";
+import pictureAPI from "../../servises/api";
 export default class ImageGallery extends Component {
   state = {
     imgList: null,
+    error: null,
+    status: "idle",
+    activePicture: null,
   };
-  //   state = { submitedValue: this.props.submitedValue };
+
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.submitedValue !== this.props.submitedValue) {
-      console.log("prevProps.submitedValue", prevProps.submitedValue);
-      console.log("this.submitedValue", this.props.submitedValue);
-
-      const MY_KEY = "24256402-655c9b75f9739418750c25629";
-      const currentPage = 1;
-
-      //   this.setState({ loading: true });
-      fetch(
-        `https://pixabay.com/api/?q=${this.props.submitedValue}&page=${currentPage}&key=${MY_KEY}&image_type=photo&orientation=horizontal&per_page=12`
-      )
-        .then((res) => res.json())
+    const { submitedValue, currentPage } = this.props;
+    if (prevProps.submitedValue !== submitedValue) {
+      this.setState({ status: "pending", imgList: null });
+      pictureAPI
+        .fetchPictures(currentPage, submitedValue)
         .then((imgList) => {
-          this.setState({ imgList: imgList.hits });
-          console.log(this.state.imgList);
+          this.setState({ imgList: imgList.hits, status: "resloved" });
         })
-        .finally(() => {
-          //   this.setState({ loading: false });
-        });
+        .catch((error) => this.setState({ error, status: "rejected" }));
     }
   }
+
+  setActiveImg = (url) => {
+    this.setState({ activePicture: url });
+    this.props.updateURL(this.state.activePicture);
+    // this.setState({ activePicture: "" });
+  };
   render() {
-    return (
-      <ImageGalleryList>
-        {this.state.imgList &&
-          this.state.imgList.map((img) => {
+    const { imgList, error, status } = this.state;
+
+    if (status === "idle") {
+      return <div></div>;
+    }
+    if (status === "pending") {
+      return <Loader />;
+    }
+    if (status === "rejected") {
+      return <h1>{error.message}</h1>;
+    }
+    if (status === "resloved") {
+      return (
+        <ImageGalleryList>
+          {imgList.map(({ webformatURL, largeImageURL, id }) => {
             return (
               <ImageGalleryItem
-                webformatURL={img.webformatURL}
-                largeImageURL={img.largeImageURL}
-                key={img.id}
+                webformatURL={webformatURL}
+                largeImageURL={largeImageURL}
+                key={id}
+                id={id}
+                onClick={this.setActiveImg}
               />
             );
           })}
-      </ImageGalleryList>
-    );
+        </ImageGalleryList>
+      );
+    }
   }
 }
