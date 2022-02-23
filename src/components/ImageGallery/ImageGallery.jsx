@@ -22,13 +22,13 @@ export default class ImageGallery extends Component {
         .fetchPictures(currentPage, submitedValue)
         .then((imgList) => {
           this.setState({
-            imgList: [...imgList.hits],
+            imgList: imgList.hits,
             status: "resloved",
           });
         })
         .catch((error) => this.setState({ error, status: "rejected" }));
     }
-    if (prevState.currentPage !== currentPage) {
+    if (prevState.currentPage !== currentPage && currentPage !== 1) {
       this.setState({ status: "pending" });
       pictureAPI
         .fetchPictures(currentPage, submitedValue)
@@ -48,7 +48,6 @@ export default class ImageGallery extends Component {
   setActiveImg = (url) => {
     this.setState({ activePicture: url });
     this.props.updateURL(this.state.activePicture);
-    // this.setState({ activePicture: "" });
   };
   render() {
     const { imgList, error, status } = this.state;
