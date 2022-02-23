@@ -7,23 +7,21 @@ import "./App.css";
 import Searchbar from "./components/SearchBar/Searchbar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import { Modal } from "./components/Modal/Modal";
-import { Button } from "./components/Button/Button";
+
 export default class App extends Component {
   state = {
     submitedValue: "",
-    currentPage: 1,
     showModal: false,
-    currentURL: null,
+    currentURL: "",
   };
+
   toggleModal = () => {
     this.setState(({ showModal }) => ({ showModal: !showModal }));
   };
   handelFormSubmit = (value) => {
     this.setState({ submitedValue: value });
   };
-  handelNextPictures = () => {
-    this.setState({ currentPage: this.state.currentPage + 1 });
-  };
+
   hahandleActivePicture = (activeURL) => {
     this.setState({ currentURL: activeURL, showModal: true });
   };
@@ -38,10 +36,10 @@ export default class App extends Component {
           submitedValue={submitedValue}
           currentPage={currentPage}
         />
-        <Button clickHadler={this.handelNextPictures} />
+
         {showModal && (
           <Modal onClose={this.toggleModal}>
-            <img src={currentURL} alt="nicePicture" width="300" />
+            <img src={currentURL} alt="nicePicture" width="700" />
           </Modal>
         )}
         <ToastContainer autoClose={2000} />

@@ -22,7 +22,7 @@ export class Modal extends Component {
   render() {
     return createPortal(
       <Overlay onClick={this.handleOverlayClick}>
-        <ModalWin>{this.props.cildren}</ModalWin>
+        <ModalWin>{this.props.children}</ModalWin>
       </Overlay>,
       modalRoot
     );
