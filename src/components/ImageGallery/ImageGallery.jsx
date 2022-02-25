@@ -9,27 +9,35 @@ export default class ImageGallery extends Component {
     imgList: [],
     error: null,
     status: "idle",
-    activePicture: null,
+    loading: false,
+    // activePicture: null,
     currentPage: 1,
   };
 
   componentDidUpdate(prevProps, prevState) {
     const { submitedValue } = this.props;
     const { currentPage } = this.state;
+    const startPage = 1;
     if (prevProps.submitedValue !== submitedValue) {
-      this.setState({ status: "pending", currentPage: 1 });
+      this.setState({
+        // status: "pending",
+        currentPage: 1,
+        imgList: [],
+      });
       pictureAPI
-        .fetchPictures(currentPage, submitedValue)
+        .fetchPictures(startPage, submitedValue)
         .then((imgList) => {
           this.setState({
             imgList: imgList.hits,
             status: "resloved",
           });
         })
-        .catch((error) => this.setState({ error, status: "rejected" }));
+        .catch((error) => this.setState({ error, status: "rejected" }))
+        .finally(this.setState({ loading: false }));
     }
     if (prevState.currentPage !== currentPage && currentPage !== 1) {
-      this.setState({ status: "pending" });
+      this.setState({ loading: true });
+
       pictureAPI
         .fetchPictures(currentPage, submitedValue)
         .then((imgList) => {
@@ -39,25 +47,26 @@ export default class ImageGallery extends Component {
           });
           return;
         })
-        .catch((error) => this.setState({ error, status: "rejected" }));
+        .catch((error) => this.setState({ error, status: "rejected" }))
+        .finally(this.setState({ loading: false }));
     }
   }
   handelNextPictures = () => {
     this.setState({ currentPage: this.state.currentPage + 1 });
   };
   setActiveImg = (url) => {
-    this.setState({ activePicture: url });
-    this.props.updateURL(this.state.activePicture);
+    // this.setState({ activePicture: url });
+    this.props.updateURL(url);
   };
   render() {
-    const { imgList, error, status } = this.state;
+    const { imgList, error, status, loading } = this.state;
 
     if (status === "idle") {
       return <div></div>;
     }
-    if (status === "pending") {
-      return <Loader />;
-    }
+    // if (status === "pending") {
+    //   return <Loader />;
+    // }
     if (status === "rejected") {
       return <h1>{error.message}</h1>;
     }
@@ -77,6 +86,7 @@ export default class ImageGallery extends Component {
               );
             })}
           </ImageGalleryList>
+          {loading && <Loader />}
           {imgList.length > 0 && (
             <Button clickHadler={this.handelNextPictures} />
           )}
